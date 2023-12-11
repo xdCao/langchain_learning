@@ -24,12 +24,12 @@ template_string = """将由三个反引号分隔的文本
 """
 
 
-prompt_template = ChatPromptTemplate.from_template(template_string)
+prompt_template = ChatPromptTemplate.from_template("请给我一段西班牙语的关于一个电子游戏商品的评论")
 
-customer_messages = prompt_template.format_messages(
-                    style=style,
-                    text=customer_email)
+# customer_messages = prompt_template.format_messages(
+#                     style=style,
+#                     text=customer_email)
 
 #调用LLM来翻译客户信息的风格
-customer_response = chat_model(customer_messages)
+customer_response = chat_model(prompt_template.format_messages())
 print(customer_response.content)
