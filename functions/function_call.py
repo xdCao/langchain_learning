@@ -89,3 +89,5 @@ response = client.chat.completions.create(
     messages=messages,
 )
 print(response)
+
+
