@@ -1,0 +1,17 @@
+{
+  'name': 'Info',
+  'description': 'Information to extract',
+  'parameters':
+  {
+    'title': 'Info',
+    'description': 'Information to extract',
+    'type': 'object',
+    'properties': {
+      'news': {
+        'title': 'News',
+        'type': 'array',
+        'items': {
+          'title': 'News',
+          'description': 'Information about news mentioned.',
+          'type': 'object',
+          'properties': {'title': {'title': 'Title', 'type': 'string'}, 'author': {'title': 'Author', 'type': 'string'}}, 'required': ['title']}}}, 'required': ['news']}} is not of type 'array' - 'functions'
