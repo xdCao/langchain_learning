@@ -1,5 +1,8 @@
 import configparser
-from langchain.agents import tool
+from langchain.agents import tool, AgentExecutor
+from langchain.agents.format_scratchpad import format_to_openai_functions
+from langchain_core.prompts import MessagesPlaceholder
+from langchain_core.runnables import RunnablePassthrough
 from pydantic import BaseModel, Field
 import requests
 import datetime
@@ -86,30 +89,29 @@ functions = [
 
 model = ChatOpenAI(temperature=0, openai_api_key=openai_api_key).bind(functions=functions)
 
-# 创建prompt
+from langchain.memory import ConversationBufferMemory
+
+# 创建带有聊天历史记录变量的prompt模板
 prompt = ChatPromptTemplate.from_messages([
     ("system", "You are helpful but sassy assistant"),
+    MessagesPlaceholder(variable_name="chat_history"),
     ("user", "{input}"),
+    MessagesPlaceholder(variable_name="agent_scratchpad")
 ])
 
+# 创建agent_chain
+agent_chain = RunnablePassthrough.assign(
+    agent_scratchpad=lambda x: format_to_openai_functions(x["intermediate_steps"])
+) | prompt | model | OpenAIFunctionsAgentOutputParser()
 
-def route(result):
-    if isinstance(result, AgentFinish):
-        return result.return_values['output']
-    else:
-        tools = {
-            "search_wikipedia": search_wikipedia,
-            "get_current_temperature": get_current_temperature,
-        }
-        return tools[result.tool].run(result.tool_input)
+# 创建记忆力组件
+memory = ConversationBufferMemory(return_messages=True,
+                                  memory_key="chat_history")
+# 添加记忆力组件
+agent_executor = AgentExecutor(agent=agent_chain,
+                               tools=[search_wikipedia, get_current_temperature],
+                               verbose=True,
+                               memory=memory)
 
-
-chain = prompt | model | OpenAIFunctionsAgentOutputParser() | route
-response = chain.invoke({"input": "今天上海的天气怎么样"})
-print(response)
-
-response = chain.invoke({"input": "什么是langchain"})
-print(response)
-
-response = chain.invoke({"input": "你好"})
-print(response)
+# 调用chain
+agent_executor.invoke({"input": "上海今天的天气怎么样"})
