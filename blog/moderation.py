@@ -6,7 +6,7 @@ from langchain.chains.constitutional_ai.base import ConstitutionalChain, Constit
 from langchain.chains.constitutional_ai.principles import PRINCIPLES
 
 config = configparser.ConfigParser()
-config.read('config.ini')
+config.read('../config.ini')
 openai_api_key = config.get('api', 'openai_api_key')
 openai_api_base = config.get('api', 'openai_api_base')
 
